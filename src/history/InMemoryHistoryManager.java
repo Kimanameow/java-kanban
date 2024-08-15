@@ -2,10 +2,8 @@ package history;
 
 import tasks.Task;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 public class InMemoryHistoryManager implements HistoryManager {
 
