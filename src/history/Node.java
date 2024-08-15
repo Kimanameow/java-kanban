@@ -23,7 +23,7 @@ public class Node {
         this.nextNode = nextNode;
     }
 
-    public Node(Task task){
+    public Node(Task task) {
         this.task = task;
     }
 
