@@ -6,8 +6,7 @@ import tasks.Task;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class InMemoryHistoryManagerTest {
     HistoryManager historyManager;
@@ -19,11 +18,32 @@ public class InMemoryHistoryManagerTest {
 
     @Test
     void addHistory() {
-        Task task1 = new Task("Name", 1);
+        Task task1 = new Task("Name", 204);
         historyManager.add(task1);
-        final List<Task> history = historyManager.getHistory();
-        assertNotNull(history, "История не пустая.");
-        assertEquals(1, history.size(), "История не пустая.");
+        assert (historyManager.getHistory().contains(task1));
+    }
+
+    @Test
+    void removeTaskFromHistory() {
+        Task task1 = new Task("Name", 304);
+        historyManager.add(task1);
+        historyManager.remove(304);
+        assertFalse(historyManager.getHistory().contains(task1));
+    }
+
+    @Test
+    void getEmptyHistory() {
+        assertTrue(historyManager.getHistory().isEmpty());
+    }
+
+    @Test
+    void addTaskWithEqualId() {
+        Task task1 = new Task("Name1", 204);
+        Task task2 = new Task("Name2", 204);
+        historyManager.add(task1);
+        historyManager.add(task2);
+        assertEquals(1, historyManager.getHistory().size());
+        assertTrue(historyManager.getHistory().contains(task2));
     }
 
 }

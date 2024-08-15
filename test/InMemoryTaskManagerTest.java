@@ -108,15 +108,6 @@ class InMemoryTaskManagerTest {
         assertFalse(task.allSubtasks().contains(sbtsk1));
     }
 
-    @Test
-    void checkHistoryFor10Col() {
-        for (int i = 0; i < 15; i++) {
-            Task tasks = new Task("Task" + i, i);
-            task.add(tasks);
-            task.getTaskPerId(i);
-        }
-        assertEquals(10, task.getHistory().size());
-    }
 }
 
 
