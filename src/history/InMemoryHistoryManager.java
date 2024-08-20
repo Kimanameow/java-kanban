@@ -7,7 +7,8 @@ import java.util.HashMap;
 
 public class InMemoryHistoryManager implements HistoryManager {
 
-    public HashMap<Integer, Node> history = new HashMap<>();
+    private HashMap<Integer, Node> history = new HashMap<>();
+
     private Node head;
     private Node tail;
 
@@ -39,8 +40,8 @@ public class InMemoryHistoryManager implements HistoryManager {
         ArrayList<Task> allTasksInHistory = new ArrayList<>();
         Node thisNode = head;
         while (thisNode != null) {
-            allTasksInHistory.add(thisNode.getTask());
-            thisNode = thisNode.getNextNode();
+            allTasksInHistory.add(thisNode.task);
+            thisNode = thisNode.nextNode;
         }
         return allTasksInHistory;
     }
@@ -49,33 +50,44 @@ public class InMemoryHistoryManager implements HistoryManager {
         if (head == null) {
             head = node;
         } else {
-            tail.setNextNode(node);
-            node.setLastNode(tail);
+            tail.nextNode = node;
+            node.lastNode = tail;
         }
         tail = node;
     }
 
     private void removeNode(Node node) {
         if (node == head) {
-            head = node.getNextNode();
+            head = node.nextNode;
             if (head != null) {
-                head.setLastNode(null);
+                head.lastNode = null;
             } else {
                 tail = null;
             }
         } else if (node == tail) {
-            tail = node.getLastNode();
+            tail = node.lastNode;
             if (tail != null) {
-                tail.setNextNode(null);
+                tail.nextNode = null;
             } else {
                 head = null;
             }
         } else {
-            Node lastNode = node.getLastNode();
-            Node nextNode = node.getNextNode();
-            lastNode.setNextNode(nextNode);
-            nextNode.setLastNode(lastNode);
+            Node lastNode = node.lastNode;
+            Node nextNode = node.nextNode;
+            lastNode.nextNode = nextNode;
+            nextNode.lastNode = lastNode;
         }
     }
 
+
+    private static class Node {
+        Task task;
+        private Node lastNode;
+        private Node nextNode;
+
+
+        public Node(Task task) {
+            this.task = task;
+        }
+    }
 }
