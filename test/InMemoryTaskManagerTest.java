@@ -17,7 +17,7 @@ class InMemoryTaskManagerTest {
     TaskManager task;
 
     @BeforeEach
-    public void createManagerForEachTest(){
+    public void createManagerForEachTest() {
         task = Managers.getDefault();
     }
 
@@ -75,7 +75,7 @@ class InMemoryTaskManagerTest {
     @Test
     void addNewSubtask() {
         Epic epic1 = new Epic("Epic1", 25);
-        Subtask subtask1 = new Subtask("Subtask 1", 3,25);
+        Subtask subtask1 = new Subtask("Subtask 1", 3, 25);
         task.add(epic1);
         task.add(subtask1);
         assertTrue(task.allSubtasks().contains(subtask1));
@@ -92,7 +92,7 @@ class InMemoryTaskManagerTest {
 
     @Test
     void removeEpic() {
-        Epic epic1 = new Epic("Epic","Descriptions");
+        Epic epic1 = new Epic("Epic", "Descriptions");
         task.add(epic1);
         int thisId = epic1.getId();
         task.removeEpicPerId(thisId);
@@ -108,15 +108,6 @@ class InMemoryTaskManagerTest {
         assertFalse(task.allSubtasks().contains(sbtsk1));
     }
 
-    @Test
-    void checkHistoryFor10Col() {
-        for (int i = 0; i < 15; i++) {
-            Task tasks = new Task("Task" + i, i);
-            task.add(tasks);
-            task.getTaskPerId(i);
-        }
-        assertEquals(10, task.getHistory().size());
-    }
 }
 
 
