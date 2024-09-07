@@ -37,7 +37,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 String name = parts[2];
                 String status = parts[3];
                 String description;
-                int idOfEpic = 0; // Initialize idOfEpic to 0
+                int idOfEpic = 0;
                 if (parts.length > 4) {
                     description = parts[4];
                     if (type.equals("SUBTASK")) {

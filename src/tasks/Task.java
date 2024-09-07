@@ -1,6 +1,5 @@
 package tasks;
 
-import java.io.IOException;
 import java.util.Objects;
 
 public class Task {
