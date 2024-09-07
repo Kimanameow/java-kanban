@@ -2,9 +2,16 @@ package tasks;
 
 public class Subtask extends Task {
     private int idOfEpic;
+    private static final TypeOfTask type = TypeOfTask.SUBTASK;
+
 
     public Subtask(String name, String description, int idOfEpic) {
         super(name, description);
+        this.idOfEpic = idOfEpic;
+    }
+
+    public Subtask(String name, String description, int id, StatusOfTask status, int idOfEpic) {
+        super(name, description, id, status);
         this.idOfEpic = idOfEpic;
     }
 
@@ -24,5 +31,12 @@ public class Subtask extends Task {
     public void setIdOfEpic(int idOfEpic) {
         this.idOfEpic = idOfEpic;
     }
+
+    @Override
+    public String toString() {
+        String stringForSubtask = super.toString();
+        return stringForSubtask + "," + idOfEpic;
+    }
 }
+
 
