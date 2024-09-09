@@ -4,8 +4,6 @@ import tasks.*;
 
 import java.io.*;
 
-import static tasks.TypeOfTask.*;
-
 public class FileBackedTaskManager extends InMemoryTaskManager {
 
     public void save() {
