@@ -1,32 +1,32 @@
 package taskmanager;
 
-import tasks.Epic;
-import tasks.StatusOfTask;
-import tasks.Subtask;
-import tasks.Task;
+import tasks.*;
 
 import java.io.*;
+
+import static tasks.TypeOfTask.*;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
 
     public void save() {
         try {
             FileWriter writer = new FileWriter("taskmanager");
+            writer.write("id,type,name,status,description,epic\n");
             for (Task task : allTasks()) {
-                writer.write(task.getId() + "," + "TASK" + "," + task.getName() + "," + task.getStatus() + "," + task.getDescription() + "\n");
+                writer.write(task.toString() + "\n");
             }
             for (Epic epic : allEpics()) {
-                writer.write(epic.getId() + "," + "EPIC" + "," + epic.getName() + "," + epic.getStatus() + "," + epic.getDescription() + "\n");
+                writer.write(epic.toString() + "\n");
             }
             for (Subtask subtask : allSubtasks()) {
-                writer.write(subtask.getId() + "," + "SUBTASK" + ',' + subtask.getName() + "," + subtask.getStatus() + "," + subtask.getDescription() + "," + subtask.getIdOfEpic() + "\n");
+                writer.write(subtask.toString() + "\n");
             }
-        } catch (Exception m) {
-            throw new ManagerSaveException();
+        } catch (IOException m) {
+            throw new ManagerSaveException("Saving error");
         }
     }
 
-    public static FileBackedTaskManager loadFromFile(File file) {
+    public FileBackedTaskManager loadFromFile(File file) {
         FileBackedTaskManager manager = new FileBackedTaskManager();
         try (BufferedReader br = new BufferedReader(new FileReader("taskmanager"))) {
             String line;
@@ -46,20 +46,25 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 } else {
                     description = "";
                 }
-                if (type.equals("SUBTASK")) {
-                    Subtask subtask = new Subtask(name, description, id, StatusOfTask.valueOf(status), idOfEpic);
-                    manager.add(subtask);
-                } else if (type.equals("TASK")) {
-                    Task task = new Task(name, description, id, StatusOfTask.valueOf(status));
-                    manager.add(task);
-                } else if (type.equals("EPIC")) {
-                    Epic epic = new Epic(name, description, id, StatusOfTask.valueOf(status));
-                    manager.add(epic);
+                switch (TypeOfTask.valueOf(type)) {
+                    case SUBTASK -> {
+                        Subtask subtask = new Subtask(name, description, id, StatusOfTask.valueOf(status), idOfEpic);
+                        manager.subtasks.put(id, subtask);
+                        manager.epics.get(idOfEpic).getListOfSubtasks().add(id);
+                    }
+                    case TASK -> {
+                        Task task = new Task(name, description, id, StatusOfTask.valueOf(status));
+                        manager.tasks.put(id, task);
+                    }
+                    case EPIC -> {
+                        Epic epic = new Epic(name, description, id, StatusOfTask.valueOf(status));
+                        manager.epics.put(id, epic);
+                    }
                 }
             }
             return manager;
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new ManagerSaveException("Saving error");
         }
     }
 
@@ -114,6 +119,24 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     @Override
     public void removeSubtaskPerId(int id) {
         super.removeSubtaskPerId(id);
+        save();
+    }
+
+    @Override
+    public void updateTask(int id, Task task) {
+        super.updateTask(id, task);
+        save();
+    }
+
+    @Override
+    public void updateSubtask(int id, Subtask subtask) {
+        super.updateSubtask(id, subtask);
+        save();
+    }
+
+    @Override
+    public void updateEpic(int id, Epic epic) {
+        super.updateEpic(id, epic);
         save();
     }
 }

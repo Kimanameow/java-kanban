@@ -2,7 +2,6 @@ package tasks;
 
 public class Subtask extends Task {
     private int idOfEpic;
-    private static final TypeOfTask type = TypeOfTask.SUBTASK;
 
 
     public Subtask(String name, String description, int idOfEpic) {
@@ -26,6 +25,10 @@ public class Subtask extends Task {
 
     public int getIdOfEpic() {
         return idOfEpic;
+    }
+
+    public TypeOfTask getType() {
+        return TypeOfTask.EPIC;
     }
 
     public void setIdOfEpic(int idOfEpic) {

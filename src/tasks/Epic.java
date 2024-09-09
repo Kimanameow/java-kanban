@@ -24,9 +24,12 @@ public class Epic extends Task {
         return listOfSubtasks;
     }
 
+    public TypeOfTask getType() {
+        return TypeOfTask.SUBTASK;
+    }
+
     @Override
     public String toString() {
-        String epicToString = super.toString();
-        return epicToString;
+        return super.toString();
     }
 }

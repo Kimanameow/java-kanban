@@ -1,5 +1,6 @@
 package tasks;
 
+import java.lang.reflect.Type;
 import java.util.Objects;
 
 public class Task {
@@ -8,7 +9,6 @@ public class Task {
     private String description;
     private int id;
     private StatusOfTask status = StatusOfTask.NEW;
-    private static final TypeOfTask type = TypeOfTask.TASK;
 
     public Task(String name, String description, int id, StatusOfTask status) {
         this.name = name;
@@ -55,6 +55,9 @@ public class Task {
         this.name = name;
     }
 
+    public TypeOfTask getType() {
+        return TypeOfTask.TASK;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -71,7 +74,7 @@ public class Task {
 
     @Override
     public String toString() {
-        return String.format("%d;%s;%s;%s;%s", id, type, name, status, description);
+        return String.format("%d;%s;%s;%s;%s", id, getType(), name, status, description);
     }
 }
 
