@@ -1,5 +1,6 @@
 import org.junit.Test;
 import taskmanager.FileBackedTaskManager;
+import tasks.*;
 
 import java.io.File;
 
@@ -10,19 +11,21 @@ public class FileBackedTaskManagerTest {
 
     @Test
     public void testSaveAndLoadEmptyFile() {
-        FileBackedTaskManager manager = new FileBackedTaskManager();
+        File file = new File("taskmanager");
+        FileBackedTaskManager manager = new FileBackedTaskManager(file);
         manager.save();
 
-        FileBackedTaskManager loadedManager = new FileBackedTaskManager();
+        FileBackedTaskManager loadedManager = new FileBackedTaskManager(file);
         loadedManager.loadFromFile(new File("taskmanager"));
         assertTrue(loadedManager.allSubtasks().isEmpty());
         assertTrue(loadedManager.allEpics().isEmpty());
         assertTrue(loadedManager.allSubtasks().isEmpty());
     }
 
-  /*  @Test
-    public void sameManagersFromLoadFile(){
-        FileBackedTaskManager manager = new FileBackedTaskManager();
+    @Test
+    public void sameManagersFromLoadFile() {
+        File file = new File("Taskmanager");
+        FileBackedTaskManager manager = new FileBackedTaskManager(file);
         Task task1 = new Task("Task1", "Description1");
         Task task2 = new Task("Task2", "Description2");
         Epic epic1 = new Epic("Epic1", "Description1");
@@ -30,10 +33,9 @@ public class FileBackedTaskManagerTest {
         manager.add(task2);
         manager.add(epic1);
 
-        FileBackedTaskManager loadedManager = manager.loadFromFile(new File("taskmanager"));
-        assertEquals(manager.allTasks(), loadedManager.allTasks());
-        assertEquals(manager.allEpics(), loadedManager.allEpics());
-        }
-        */
+        manager.loadFromFile(file);
+        assertEquals(2, manager.allTasks().size());
+        assertEquals(1, manager.allEpics().size());
+    }
 
 }

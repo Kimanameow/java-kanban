@@ -5,6 +5,11 @@ import tasks.*;
 import java.io.*;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
+    File file;
+
+    public FileBackedTaskManager(File file) {
+        this.file = file;
+    }
 
     public void save() {
         try {
@@ -25,7 +30,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     public FileBackedTaskManager loadFromFile(File file) {
-        FileBackedTaskManager manager = new FileBackedTaskManager();
+        FileBackedTaskManager manager = new FileBackedTaskManager(file);
         try (BufferedReader br = new BufferedReader(new FileReader("taskmanager"))) {
             String line;
             while ((line = br.readLine()) != null) {
@@ -49,14 +54,17 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                         Subtask subtask = new Subtask(name, description, id, StatusOfTask.valueOf(status), idOfEpic);
                         manager.subtasks.put(id, subtask);
                         manager.epics.get(idOfEpic).getListOfSubtasks().add(id);
+                        manager.nextId++;
                     }
                     case TASK -> {
                         Task task = new Task(name, description, id, StatusOfTask.valueOf(status));
                         manager.tasks.put(id, task);
+                        manager.nextId++;
                     }
                     case EPIC -> {
                         Epic epic = new Epic(name, description, id, StatusOfTask.valueOf(status));
                         manager.epics.put(id, epic);
+                        manager.nextId++;
                     }
                 }
             }
