@@ -5,7 +5,7 @@ import tasks.*;
 import java.io.*;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
-    File file;
+    protected File file;
 
     public FileBackedTaskManager(File file) {
         this.file = file;
@@ -13,7 +13,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     public void save() {
         try {
-            FileWriter writer = new FileWriter("taskmanager");
+            FileWriter writer = new FileWriter("Taskmanager");
             writer.write("id,type,name,status,description,epic\n");
             for (Task task : allTasks()) {
                 writer.write(task.toString() + "\n");
@@ -29,9 +29,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
     }
 
-    public FileBackedTaskManager loadFromFile(File file) {
+    public static FileBackedTaskManager loadFromFile(File file) {
         FileBackedTaskManager manager = new FileBackedTaskManager(file);
-        try (BufferedReader br = new BufferedReader(new FileReader("taskmanager"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] parts = line.split(",");
@@ -54,17 +54,25 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                         Subtask subtask = new Subtask(name, description, id, StatusOfTask.valueOf(status), idOfEpic);
                         manager.subtasks.put(id, subtask);
                         manager.epics.get(idOfEpic).getListOfSubtasks().add(id);
-                        manager.nextId++;
+                        if (id > manager.nextId) {
+                            manager.nextId = id + 1;
+                        }
                     }
                     case TASK -> {
                         Task task = new Task(name, description, id, StatusOfTask.valueOf(status));
                         manager.tasks.put(id, task);
                         manager.nextId++;
+                        if (id > manager.nextId) {
+                            manager.nextId = id + 1;
+                        }
                     }
                     case EPIC -> {
                         Epic epic = new Epic(name, description, id, StatusOfTask.valueOf(status));
                         manager.epics.put(id, epic);
                         manager.nextId++;
+                        if (id > manager.nextId) {
+                            manager.nextId = id + 1;
+                        }
                     }
                 }
             }
