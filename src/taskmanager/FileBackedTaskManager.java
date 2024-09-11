@@ -78,7 +78,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             }
             return manager;
         } catch (IOException e) {
-            throw new ManagerSaveException("Saving error");
+            throw new ManagerSaveException("Saving error!");
         }
     }
 
