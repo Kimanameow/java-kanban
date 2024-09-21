@@ -25,7 +25,7 @@ public class Epic extends Task {
     }
 
     public TypeOfTask getType() {
-        return TypeOfTask.SUBTASK;
+        return TypeOfTask.EPIC;
     }
 
     @Override

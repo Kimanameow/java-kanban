@@ -28,7 +28,7 @@ public class Subtask extends Task {
     }
 
     public TypeOfTask getType() {
-        return TypeOfTask.EPIC;
+        return TypeOfTask.SUBTASK;
     }
 
     public void setIdOfEpic(int idOfEpic) {

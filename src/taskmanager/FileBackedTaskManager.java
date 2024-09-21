@@ -13,7 +13,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     public void save() {
         try {
-            FileWriter writer = new FileWriter("Taskmanager");
+            FileWriter writer = new FileWriter(file);
             writer.write("id,type,name,status,description,epic\n");
             for (Task task : allTasks()) {
                 writer.write(task.toString() + "\n");
@@ -33,7 +33,12 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         FileBackedTaskManager manager = new FileBackedTaskManager(file);
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String line;
+            boolean isFirstLine = true;
             while ((line = br.readLine()) != null) {
+                if (isFirstLine) {
+                    isFirstLine = false;
+                    continue;
+                }
                 String[] parts = line.split(",");
                 int id = Integer.parseInt(parts[0]);
                 String type = parts[1];
@@ -41,38 +46,30 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 String status = parts[3];
                 String description;
                 int idOfEpic = 0;
+                if (id > manager.nextId) {
+                    manager.nextId = id;
+                }
                 if (parts.length > 4) {
                     description = parts[4];
-                    if (type.equals("SUBTASK")) {
-                        idOfEpic = Integer.parseInt(parts[5]);
-                    }
                 } else {
                     description = "";
+                }
+                if (type.equals("SUBTASK")) {
+                    idOfEpic = Integer.parseInt(parts[5]);
                 }
                 switch (TypeOfTask.valueOf(type)) {
                     case SUBTASK -> {
                         Subtask subtask = new Subtask(name, description, id, StatusOfTask.valueOf(status), idOfEpic);
                         manager.subtasks.put(id, subtask);
                         manager.epics.get(idOfEpic).getListOfSubtasks().add(id);
-                        if (id > manager.nextId) {
-                            manager.nextId = id + 1;
-                        }
                     }
                     case TASK -> {
                         Task task = new Task(name, description, id, StatusOfTask.valueOf(status));
                         manager.tasks.put(id, task);
-                        manager.nextId++;
-                        if (id > manager.nextId) {
-                            manager.nextId = id + 1;
-                        }
                     }
                     case EPIC -> {
                         Epic epic = new Epic(name, description, id, StatusOfTask.valueOf(status));
                         manager.epics.put(id, epic);
-                        manager.nextId++;
-                        if (id > manager.nextId) {
-                            manager.nextId = id + 1;
-                        }
                     }
                 }
             }
