@@ -12,8 +12,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     public void save() {
+        FileWriter writer = null;
         try {
-            FileWriter writer = new FileWriter(file);
+            writer = new FileWriter(file);
             writer.write("id,type,name,status,description,epic\n");
             for (Task task : allTasks()) {
                 writer.write(task.toString() + "\n");
@@ -26,6 +27,14 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             }
         } catch (IOException m) {
             throw new ManagerSaveException("Saving error");
+        } finally {
+            if (writer != null) {
+                try {
+                    writer.close();
+                } catch (IOException m) {
+                    throw new ManagerSaveException("Error");
+                }
+            }
         }
     }
 
