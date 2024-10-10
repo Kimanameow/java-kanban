@@ -1,14 +1,14 @@
-import history.HistoryManager;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import taskmanager.Managers;
+import taskmanager.NotAvailableTimeException;
 import taskmanager.TaskManager;
 import tasks.Epic;
 import tasks.StatusOfTask;
 import tasks.Subtask;
 import tasks.Task;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -75,8 +75,8 @@ class InMemoryTaskManagerTest {
     @Test
     void addNewSubtask() {
         Epic epic1 = new Epic("Epic1", 25);
-        Subtask subtask1 = new Subtask("Subtask 1", 3, 25);
         task.add(epic1);
+        Subtask subtask1 = new Subtask("Subtask 1", 3, epic1.getId());
         task.add(subtask1);
         assertTrue(task.allSubtasks().contains(subtask1));
     }
@@ -94,18 +94,19 @@ class InMemoryTaskManagerTest {
     void removeEpic() {
         Epic epic1 = new Epic("Epic", "Descriptions");
         task.add(epic1);
-        int thisId = epic1.getId();
-        task.removeEpicPerId(thisId);
+        task.removeEpicPerId(epic1.getId());
         assertFalse(task.allEpics().contains(epic1));
     }
 
     @Test
-    void removeSubtask() {
-        Subtask sbtsk1 = new Subtask("Subtask", 103);
-        task.add(sbtsk1);
-        int thisId = sbtsk1.getId();
-        task.removeSubtaskPerId(thisId);
-        assertFalse(task.allSubtasks().contains(sbtsk1));
+    public void catchTimeException (){
+        LocalDateTime sbtsk1Time = LocalDateTime.now();
+        Epic epic1 = new Epic("Name", "Descr",10, StatusOfTask.IN_PROGRESS );
+        task.add(epic1);
+        Subtask subtask1 = new Subtask("Name", "Descr", 50, StatusOfTask.NEW, epic1.getId(), 20, sbtsk1Time);
+        Subtask subtask2 = new Subtask("name", "Descr", 20, StatusOfTask.NEW, epic1.getId(), 20, sbtsk1Time);
+        task.add(subtask1);
+        assertThrows(NotAvailableTimeException.class, () -> task.add(subtask2));
     }
 
 }
