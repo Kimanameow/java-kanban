@@ -1,5 +1,8 @@
 package tasks;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 public class Task {
@@ -8,10 +11,20 @@ public class Task {
     private String description;
     private int id;
     private StatusOfTask status = StatusOfTask.NEW;
+    private LocalDateTime startTime;
+    private Duration duration;
 
-    public Task(String name, String description, int id, StatusOfTask status) {
+    public Task(String name, String description, int id, StatusOfTask status, LocalDateTime startTime, int minutesOfDuration) {
         this.name = name;
         this.description = description;
+        this.id = id;
+        this.status = status;
+        this.startTime = startTime;
+        this.duration = Duration.ofMinutes(minutesOfDuration);
+    }
+
+    public Task(String name, int id, StatusOfTask status) {
+        this.name = name;
         this.id = id;
         this.status = status;
     }
@@ -24,6 +37,9 @@ public class Task {
     public Task(String name, String description) {
         this.name = name;
         this.description = description;
+    }
+
+    public Task(String name, String description, int id, StatusOfTask status) {
     }
 
     public String getName() {
@@ -73,12 +89,19 @@ public class Task {
 
     @Override
     public String toString() {
-        return String.format("%s,%s,%s,%s,%s", id, getType(), name, status, description);
+        return String.format("%s,%s,%s,%s,%s,%s,%s,%s", id, getType(), name, status, description, duration.toMinutes(), formatLocalDateTime(startTime), getEndTime());
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public String formatLocalDateTime(LocalDateTime localDateTime) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+        return localDateTime.format(formatter);
+    }
+
+    public LocalDateTime getEndTime() {
+        return startTime.plusMinutes(duration.toMinutes());
     }
 }
-
-
-
-
-
-

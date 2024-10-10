@@ -7,7 +7,9 @@ import tasks.Subtask;
 import tasks.Task;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.TreeSet;
 
 public class InMemoryTaskManager implements TaskManager {
 
@@ -73,32 +75,39 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void add(Task task) {
-        task.setId(nextId);
-        tasks.put(nextId, task);
-        nextId++;
+        if (!findTaskWithTheSameTime(task, allTasks())) {
+            task.setId(nextId);
+            tasks.put(nextId, task);
+            nextId++;
+        } else throw new NotAvailableTimeException("Задача на данное время уже существует");
     }
 
     @Override
     public void add(Epic epic) {
-        epic.setId(nextId);
-        epics.put(nextId, epic);
-        nextId++;
-        changeStatus(epic);
+        if (!findEpicWithTheSameTime(epic, allEpics())) {
+            epic.setId(nextId);
+            epics.put(nextId, epic);
+            nextId++;
+            changeStatus(epic);
+        } else throw new NotAvailableTimeException("Задача на данное время уже существует");
     }
 
     @Override
     public void add(Subtask subtask) {
-        subtask.setId(nextId);
-        subtasks.put(nextId, subtask);
-        nextId++;
+        if (!findSubtaskWithTheSameTime(subtask, allSubtasks())) {
+            if (subtask.getId() == 0) {
+                subtask.setId(nextId);
+                nextId++;
+            }
+            subtasks.put(subtask.getId(), subtask);
 
-        Epic epic = epics.get(subtask.getIdOfEpic());
-        if (epic == null) {
-            epic = new Epic("EpicForThisSubtask", subtask.getIdOfEpic());
-            add(epic);
-        }
-        epic.getListOfSubtasks().add(subtask.getId());
-        changeStatus(epic);
+            Epic epic = epics.get(subtask.getIdOfEpic());
+            if (epic == null) {
+                throw new EpicNotFoundException("Эпика не существует");
+            }
+            epic.getListOfSubtasks().add(subtask.getId());
+            changeStatus(epic);
+        } else throw new NotAvailableTimeException("Задача на данное время уже существует");
     }
 
     @Override
@@ -107,10 +116,9 @@ public class InMemoryTaskManager implements TaskManager {
         if (epics.containsKey(id)) {
             Epic epic = epics.get(id);
             if (!subtasks.isEmpty()) {
-                for (Integer subtasksId : epic.getListOfSubtasks()) {
-                    Subtask subtask = subtasks.get(subtasksId);
-                    listOfSubtasks.add(subtask.getName());
-                }
+                epic.getListOfSubtasks().stream()
+                        .map(subtasksId -> subtasks.get(subtasksId).getName())
+                        .forEach(listOfSubtasks::add);
             }
         }
         return listOfSubtasks;
@@ -125,9 +133,8 @@ public class InMemoryTaskManager implements TaskManager {
     public void removeEpicPerId(int id) {
         Epic epic = epics.remove(id);
         if (epic != null) {
-            for (Integer thisId : epic.getListOfSubtasks()) {
-                subtasks.remove(thisId);
-            }
+            epic.getListOfSubtasks()
+                    .forEach(subtasks::remove);
         }
     }
 
@@ -138,9 +145,8 @@ public class InMemoryTaskManager implements TaskManager {
         }
         int idOfEpic = subtasks.get(id).getIdOfEpic();
         subtasks.remove(id);
-        if (epics.containsKey(idOfEpic)) {
-            changeStatus(epics.get(idOfEpic));
-        }
+        epics.get(idOfEpic).getListOfSubtasks().remove(id);
+        changeStatus(epics.get(idOfEpic));
     }
 
     @Override
@@ -169,31 +175,63 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void changeStatus(Epic epic) {
-        boolean checkNew = true;
-        boolean checkDone = true;
-
-        for (Integer id : epic.getListOfSubtasks()) {
-            if (subtasks.get(id).getStatus() != StatusOfTask.NEW) {
-                checkNew = false;
-                break;
-            }
-        }
-        for (Integer id : epic.getListOfSubtasks()) {
-            if (subtasks.get(id).getStatus() != StatusOfTask.DONE) {
-                checkDone = false;
-                break;
-            }
-        }
-        if (epic.getListOfSubtasks().isEmpty() || checkNew) {
+        if(subtasks.isEmpty()) {
             epic.setStatus(StatusOfTask.NEW);
-        } else if (checkDone) {
-            epic.setStatus(StatusOfTask.DONE);
         } else {
-            epic.setStatus(StatusOfTask.IN_PROGRESS);
+        boolean checkNew;
+        boolean checkDone;
+            checkNew = epic.getListOfSubtasks().stream()
+                    .allMatch(id -> subtasks.get(id).getStatus() == StatusOfTask.NEW);
+            checkDone = epic.getListOfSubtasks().stream()
+                    .allMatch(id -> subtasks.get(id).getStatus() == StatusOfTask.DONE);
+            if (epic.getListOfSubtasks().isEmpty() || checkNew) {
+                epic.setStatus(StatusOfTask.NEW);
+            } else if (checkDone) {
+                epic.setStatus(StatusOfTask.DONE);
+            } else {
+                epic.setStatus(StatusOfTask.IN_PROGRESS);
+            }
         }
     }
 
     public ArrayList<Task> getHistory() {
         return historyManager.getHistory();
     }
+
+    public <T extends Task> TreeSet<T> getPrioritizedTasks(ArrayList<T> tasks) {
+        TreeSet<T> prioritizedTasks = new TreeSet<>(Comparator.comparing(Task::getStartTime));
+        tasks.stream()
+                .filter(task -> task.getStartTime() != null)
+                .forEach(prioritizedTasks::add);
+        return prioritizedTasks;
+    }
+
+    public boolean findTaskWithTheSameTime(Task task, ArrayList<Task> tasks1) {
+        TreeSet<Task> tasks = new TreeSet<>(getPrioritizedTasks(tasks1));
+        if (tasks.isEmpty()) {
+            return false;
+        }
+        return tasks.stream().anyMatch(t -> findSameTimeTask(task, t));
+    }
+
+    public boolean findEpicWithTheSameTime(Epic epic, ArrayList<Epic> epics1) {
+        TreeSet<Epic> epics = new TreeSet<>(getPrioritizedTasks(epics1));
+        if (epics.isEmpty()) {
+            return false;
+        }
+        return epics.stream().anyMatch(e -> findSameTimeTask(epic, e));
+    }
+
+    public boolean findSubtaskWithTheSameTime(Subtask subtask, ArrayList<Subtask> subtasks1) {
+        TreeSet<Subtask> subtasks = new TreeSet<>(getPrioritizedTasks(subtasks1));
+        if (subtasks.isEmpty()) {
+            return false;
+        }
+        return subtasks.stream().anyMatch(s -> findSameTimeTask(subtask, s));
+    }
+
+    public boolean findSameTimeTask(Task task1, Task task2) {
+        return task1.getStartTime().isBefore(task2.getEndTime()) && task2.getStartTime().isBefore(task1.getEndTime());
+    }
 }
+
