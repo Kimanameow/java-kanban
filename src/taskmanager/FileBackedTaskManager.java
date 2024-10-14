@@ -130,8 +130,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     @Override
     public void removeSubtaskPerId(int id) {
+        int epicId = subtasks.get(id).getIdOfEpic();
         super.removeSubtaskPerId(id);
-        findTimeFromSubtasks(epics.get(subtasks.get(id).getIdOfEpic()));
+        findTimeFromSubtasks(epics.get(epicId));
         save();
     }
 

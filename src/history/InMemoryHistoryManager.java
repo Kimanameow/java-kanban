@@ -22,29 +22,11 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public void add(Task task) {
-        if (!history.isEmpty()) {
-            if (history.containsKey(task.getId())) {
-                remove(task.getId());
-            }
+        if (history.containsKey(task.getId())) {
+            remove(task.getId());
         }
         linkLast(task);
         history.put(task.getId(), tail);
-    }
-
-    public void add(Epic epic) {
-        if (history.containsKey(epic.getId())) {
-            remove(epic.getId());
-        }
-        linkLast(epic);
-        history.put(epic.getId(), tail);
-    }
-
-    public void add(Subtask subtask) {
-        if (history.containsKey(subtask.getId())) {
-            remove(subtask.getId());
-        }
-        linkLast(subtask);
-        history.put(subtask.getId(), tail);
     }
 
     @Override

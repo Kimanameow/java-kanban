@@ -8,10 +8,7 @@ import tasks.Task;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.TreeSet;
+import java.util.*;
 
 public class InMemoryTaskManager implements TaskManager {
 
@@ -20,6 +17,8 @@ public class InMemoryTaskManager implements TaskManager {
     protected final HashMap<Integer, Subtask> subtasks = new HashMap<>();
     protected HistoryManager historyManager = Managers.getDefaultHistory();
     protected int nextId = 1;
+    protected TreeSet<Task> sortedTasks = new TreeSet<>();
+
 
     @Override
     public ArrayList<Task> allTasks() {
@@ -204,12 +203,11 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     public void findTimeFromSubtasks(Epic epic) {
-        InMemoryTaskManager manager = new InMemoryTaskManager();
         if (!epic.getListOfSubtasks().isEmpty()) {
             LocalDateTime startTime = LocalDateTime.MAX;
             LocalDateTime endTime = LocalDateTime.MIN;
             for (int id : epic.getListOfSubtasks()) {
-                Subtask subtask = manager.getSubtaskPerId(id);
+                Subtask subtask = getSubtaskPerId(id);
                 if (subtask.getStartTime().isBefore(startTime)) {
                     startTime = subtask.getStartTime();
                 }

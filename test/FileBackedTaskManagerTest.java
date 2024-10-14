@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FileBackedTaskManagerTest extends TaskManagerTest {
@@ -88,11 +89,11 @@ public class FileBackedTaskManagerTest extends TaskManagerTest {
 
     @Test
     public void getSubtaskPerId() {
-      /*  manager.add(epic1);
+        manager.add(epic1);
         manager.add(subtask1);
 
         FileBackedTaskManager newManager = FileBackedTaskManager.loadFromFile(file);
-        assertEquals(subtask1, newManager.getSubtaskPerId(subtask1.getId())); */
+        assertEquals(subtask1, newManager.getSubtaskPerId(subtask1.getId()));
     }
 
     @Test
@@ -113,20 +114,20 @@ public class FileBackedTaskManagerTest extends TaskManagerTest {
 
     @Test
     public void addNewSubtask() {
-      /*  manager.add(epic1);
+        manager.add(epic1);
         manager.add(subtask1);
 
         FileBackedTaskManager newManager = FileBackedTaskManager.loadFromFile(file);
-        assertEquals(1, newManager.allSubtasks().size()); */
+        assertEquals(1, newManager.allSubtasks().size());
     }
 
     @Test
     public void subtasksForEpic() {
-       /* manager.add(epic1);
+        manager.add(epic1);
         manager.add(subtask1);
 
         FileBackedTaskManager newManager = FileBackedTaskManager.loadFromFile(file);
-        assertTrue(newManager.subtasksForEpic(epic1.getId()).contains(subtask1.getId())); */
+        assertEquals(1, newManager.subtasksForEpic(subtask1.getIdOfEpic()).size());
     }
 
     @Test
@@ -149,12 +150,12 @@ public class FileBackedTaskManagerTest extends TaskManagerTest {
 
     @Test
     public void removeSubtaskPerId() {
-      /*  manager.add(epic1);
+        manager.add(epic1);
         manager.add(subtask1);
         manager.removeSubtaskPerId(subtask1.getId());
 
         FileBackedTaskManager newManager = FileBackedTaskManager.loadFromFile(file);
-        assertTrue(newManager.allSubtasks().isEmpty()); */
+        assertTrue(newManager.allSubtasks().isEmpty());
     }
 
     @Test
@@ -169,7 +170,13 @@ public class FileBackedTaskManagerTest extends TaskManagerTest {
 
     @Override
     public void updateSubtask() {
+        manager.add(epic1);
+        manager.add(subtask1);
+        Subtask newSubtask = new Subtask("name", "descr", subtask1.getId(), StatusOfTask.DONE, epic1.getId(), 10, LocalDateTime.now());
+        manager.updateSubtask(subtask1.getId(), newSubtask);
 
+        FileBackedTaskManager newManager = FileBackedTaskManager.loadFromFile(file);
+        assertTrue(newManager.allSubtasks().contains(newSubtask));
     }
 
     @Test
@@ -184,19 +191,19 @@ public class FileBackedTaskManagerTest extends TaskManagerTest {
 
     @Test
     public void changeStatus() {
-       /* manager.add(epic1);
+        manager.add(epic1);
         manager.add(subtask1);
 
         FileBackedTaskManager newManager = FileBackedTaskManager.loadFromFile(file);
-        assertEquals(StatusOfTask.DONE, newManager.getEpicPerId(epic1.getId()).getStatus()); */
+        assertEquals(StatusOfTask.DONE, newManager.getEpicPerId(epic1.getId()).getStatus());
     }
 
     @Test
     public void getHistory() {
-     /*   manager.add(task1);
-        manager.getTaskPerId(task1.getId());
+        /*manager.add(epic1);
+        manager.getEpicPerId(epic1.getId());
 
         FileBackedTaskManager newManager = FileBackedTaskManager.loadFromFile(file);
-        assertFalse(newManager.getHistory().isEmpty()); */
+        assertEquals(1, newManager.getHistory().size());*/
     }
 }
