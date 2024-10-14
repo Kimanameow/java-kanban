@@ -14,11 +14,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         this.file = file;
     }
 
-    public void save() {
-        FileWriter writer = null;
-        try {
-            writer = new FileWriter(file);
-            writer.write("id,type,name,status,description,duration,startTime,endTime,epic\n");
+    private void save() {
+        try (FileWriter writer = new FileWriter(file)) {
+            writer.write("id,type,name,status,description,duration,startTime,epic\n");
             for (Task task : allTasks()) {
                 writer.write(task.toString() + "\n");
             }
@@ -30,14 +28,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             }
         } catch (IOException m) {
             throw new ManagerSaveException("Saving error");
-        } finally {
-            if (writer != null) {
-                try {
-                    writer.close();
-                } catch (IOException m) {
-                    throw new ManagerSaveException("Error");
-                }
-            }
         }
     }
 
@@ -71,7 +61,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                     case SUBTASK -> {
                         Subtask subtask = new Subtask(name, description, id, StatusOfTask.valueOf(status), idOfEpic, (int) duration.toMinutes(), startTime);
                         manager.subtasks.put(id, subtask);
-                        manager.epics.get(idOfEpic).getListOfSubtasks().add(id);
+                        manager.epics.get(idOfEpic).addIdOfSubtaskToList(id);
                     }
                     case TASK -> {
                         Task task = new Task(name, description, id, StatusOfTask.valueOf(status), startTime, (int) duration.toMinutes());
@@ -92,7 +82,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     @Override
     public void add(Subtask subtask) {
         super.add(subtask);
-        epics.get(subtask.getIdOfEpic()).findTimeFromSubtasks();
+        findTimeFromSubtasks(epics.get(subtask.getIdOfEpic()));
         save();
     }
 
@@ -141,7 +131,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     @Override
     public void removeSubtaskPerId(int id) {
         super.removeSubtaskPerId(id);
-        epics.get(subtasks.get(id).getIdOfEpic()).findTimeFromSubtasks();
+        findTimeFromSubtasks(epics.get(subtasks.get(id).getIdOfEpic()));
         save();
     }
 
@@ -154,7 +144,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     @Override
     public void updateSubtask(int id, Subtask subtask) {
         super.updateSubtask(id, subtask);
-        epics.get(subtask.getIdOfEpic()).findTimeFromSubtasks();
+        findTimeFromSubtasks(epics.get(subtask.getIdOfEpic()));
         save();
     }
 

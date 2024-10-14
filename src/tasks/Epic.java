@@ -1,8 +1,5 @@
 package tasks;
 
-import taskmanager.InMemoryTaskManager;
-
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
@@ -11,13 +8,8 @@ public class Epic extends Task {
 
     private ArrayList<Integer> listOfSubtasks = new ArrayList<>();
     private static final TypeOfTask type = TypeOfTask.EPIC;
-    Duration duration;
-    LocalDateTime startTime;
-    LocalDateTime endTime;
+    private LocalDateTime endTime;
 
-    public Epic(String name, String description, int id, StatusOfTask status) {
-        super(name, description, id, status);
-    }
 
     public Epic(String name, String description) {
         super(name, description);
@@ -39,27 +31,16 @@ public class Epic extends Task {
         return TypeOfTask.EPIC;
     }
 
+    public void setEndTime(LocalDateTime endTime) {
+        this.endTime = endTime;
+    }
+
     @Override
     public String toString() {
         return super.toString();
     }
 
-    public void findTimeFromSubtasks() {
-        InMemoryTaskManager manager = new InMemoryTaskManager();
-        if (!getListOfSubtasks().isEmpty()) {
-            LocalDateTime startTime = LocalDateTime.MAX;
-            LocalDateTime endTime = LocalDateTime.MIN;
-            for (int id : getListOfSubtasks()) {
-                Subtask subtask = manager.allSubtasks().get(id);
-                if (subtask.getStartTime().isBefore(startTime)) {
-                    startTime = subtask.getStartTime();
-                }
-                if (subtask.getEndTime().isAfter(endTime)) {
-                    startTime = subtask.getEndTime();
-                }
-            }
-            this.startTime = startTime;
-            this.endTime = endTime;
-        }
+    public void addIdOfSubtaskToList(int id) {
+        listOfSubtasks.add(id);
     }
 }

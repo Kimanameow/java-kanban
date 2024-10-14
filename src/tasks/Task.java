@@ -3,7 +3,9 @@ package tasks;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Objects;
+import java.util.TreeSet;
 
 public class Task {
 
@@ -19,8 +21,15 @@ public class Task {
         this.description = description;
         this.id = id;
         this.status = status;
-        this.startTime = startTime;
+        setStartTime(startTime);
         this.duration = Duration.ofMinutes(minutesOfDuration);
+    }
+
+    public Task(String name, String description, int id, StatusOfTask status) {
+        this.name = name;
+        this.description = description;
+        this.id = id;
+        this.status = status;
     }
 
     public Task(String name, int id, StatusOfTask status) {
@@ -37,9 +46,6 @@ public class Task {
     public Task(String name, String description) {
         this.name = name;
         this.description = description;
-    }
-
-    public Task(String name, String description, int id, StatusOfTask status) {
     }
 
     public String getName() {
@@ -74,6 +80,16 @@ public class Task {
         return TypeOfTask.TASK;
     }
 
+    public void setStartTime(LocalDateTime startTime) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy'T'HH:mm:ss.SSSSSS");
+        startTime.format(formatter);
+        this.startTime = startTime;
+    }
+
+    public void setDuration(Duration duration) {
+        this.duration = duration;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -87,18 +103,17 @@ public class Task {
         return Objects.hash(id);
     }
 
-    @Override
     public String toString() {
-        return String.format("%s,%s,%s,%s,%s,%s,%s,%s", id, getType(), name, status, description, duration.toMinutes(), formatLocalDateTime(startTime), getEndTime());
-    }
-
-    public LocalDateTime getStartTime() {
-        return startTime;
+        return String.format("%s,%s,%s,%s,%s,%s,%s", id, getType(), name, status, description, duration.toMinutes(), formatLocalDateTime(startTime));
     }
 
     public String formatLocalDateTime(LocalDateTime localDateTime) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
         return localDateTime.format(formatter);
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
     }
 
     public LocalDateTime getEndTime() {
