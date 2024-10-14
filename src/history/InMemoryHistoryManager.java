@@ -1,7 +1,5 @@
 package history;
 
-import tasks.Epic;
-import tasks.Subtask;
 import tasks.Task;
 
 import java.util.ArrayList;
