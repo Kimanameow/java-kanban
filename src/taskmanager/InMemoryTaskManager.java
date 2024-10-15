@@ -17,7 +17,8 @@ public class InMemoryTaskManager implements TaskManager {
     protected final HashMap<Integer, Subtask> subtasks = new HashMap<>();
     protected HistoryManager historyManager = Managers.getDefaultHistory();
     protected int nextId = 1;
-    protected TreeSet<Task> sortedTasks = new TreeSet<>();
+    protected TreeSet<Task> sortedTasks = new TreeSet<>(Comparator.comparing(Task::getStartTime));
+    protected TreeSet<Subtask> sortedSubtasks = new TreeSet<>(Comparator.comparing(Subtask::getStartTime));
 
 
     @Override
@@ -38,12 +39,14 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void removeTasks() {
         tasks.clear();
+        sortedTasks.clear();
     }
 
     @Override
     public void removeEpics() {
         epics.clear();
         subtasks.clear();
+        sortedSubtasks.clear();
     }
 
     @Override
@@ -53,6 +56,7 @@ public class InMemoryTaskManager implements TaskManager {
             changeStatus(e);
             e.getListOfSubtasks().clear();
         }
+        sortedSubtasks.clear();
     }
 
 
@@ -80,6 +84,7 @@ public class InMemoryTaskManager implements TaskManager {
             task.setId(nextId);
             tasks.put(nextId, task);
             nextId++;
+            sortedTasks.add(task);
         } else throw new NotAvailableTimeException("Задача на данное время уже существует");
     }
 
@@ -110,6 +115,8 @@ public class InMemoryTaskManager implements TaskManager {
             }
             epic1.getListOfSubtasks().add(subtask.getId());
             changeStatus(epic1);
+            findTimeFromSubtasks(epics.get(subtask.getIdOfEpic()));
+            sortedSubtasks.add(subtask);
         } else throw new NotAvailableTimeException("Задача на данное время уже существует");
     }
 
@@ -127,6 +134,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void removeTaskPerId(int id) {
+        sortedTasks.remove(getTaskPerId(id));
         tasks.remove(id);
     }
 
@@ -140,19 +148,24 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void removeSubtaskPerId(int id) {
+        sortedSubtasks.remove(getSubtaskPerId(id));
+        int epicId = subtasks.get(id).getIdOfEpic();
         if (!subtasks.containsKey(id)) {
             return;
         }
         int idOfEpic = subtasks.get(id).getIdOfEpic();
         subtasks.remove(id);
         epics.get(idOfEpic).getListOfSubtasks().remove(Integer.valueOf(id));
+        findTimeFromSubtasks(epics.get(epicId));
         changeStatus(epics.get(idOfEpic));
     }
 
     @Override
     public void updateTask(int id, Task task) {
         if (tasks.containsKey(id)) {
-            tasks.put(id, task);
+            sortedTasks.remove(getTaskPerId(id));
+            tasks.remove(id);
+            add(task);
         }
     }
 
@@ -164,6 +177,7 @@ public class InMemoryTaskManager implements TaskManager {
                 changeStatus(epics.get(subtask.getIdOfEpic()));
             }
         }
+        findTimeFromSubtasks(epics.get(subtask.getIdOfEpic()));
     }
 
     @Override
@@ -196,13 +210,12 @@ public class InMemoryTaskManager implements TaskManager {
         return historyManager.getHistory();
     }
 
-    public <T extends Task> TreeSet<T> getPrioritizedTasks(ArrayList<T> tasks) {
-        TreeSet<T> prioritizedTasks = new TreeSet<>(Comparator.comparing(Task::getStartTime));
-        tasks.stream().filter(task -> task.getStartTime() != null).forEach(prioritizedTasks::add);
-        return prioritizedTasks;
+    @Override
+    public ArrayList<Task> getPrioritizedTasks() {
+        return new ArrayList<>(sortedTasks);
     }
 
-    public void findTimeFromSubtasks(Epic epic) {
+    private void findTimeFromSubtasks(Epic epic) {
         if (!epic.getListOfSubtasks().isEmpty()) {
             LocalDateTime startTime = LocalDateTime.MAX;
             LocalDateTime endTime = LocalDateTime.MIN;
@@ -221,15 +234,17 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    public <T extends Task> boolean findTaskWithTheSameTime(T task, ArrayList<T> tasks1) {
-        TreeSet<T> tasks = new TreeSet<>(getPrioritizedTasks(tasks1));
+    private <T extends Task> boolean findTaskWithTheSameTime(T task, ArrayList<T> tasks) {
         if (tasks.isEmpty()) {
             return false;
         }
         return tasks.stream().anyMatch(t -> findSameTimeTask(task, t));
     }
 
-    public boolean findSameTimeTask(Task task1, Task task2) {
+    private boolean findSameTimeTask(Task task1, Task task2) {
+        if (task1 == null || task2 == null) {
+            return false;
+        }
         return task1.getStartTime().isBefore(task2.getEndTime()) && task2.getStartTime().isBefore(task1.getEndTime());
     }
 }

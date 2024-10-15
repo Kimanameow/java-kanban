@@ -82,7 +82,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     @Override
     public void add(Subtask subtask) {
         super.add(subtask);
-        findTimeFromSubtasks(epics.get(subtask.getIdOfEpic()));
         save();
     }
 
@@ -130,9 +129,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     @Override
     public void removeSubtaskPerId(int id) {
-        int epicId = subtasks.get(id).getIdOfEpic();
         super.removeSubtaskPerId(id);
-        findTimeFromSubtasks(epics.get(epicId));
         save();
     }
 
@@ -145,7 +142,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     @Override
     public void updateSubtask(int id, Subtask subtask) {
         super.updateSubtask(id, subtask);
-        findTimeFromSubtasks(epics.get(subtask.getIdOfEpic()));
         save();
     }
 

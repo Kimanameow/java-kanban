@@ -48,4 +48,6 @@ public interface TaskManager {
     void changeStatus(Epic epic);
 
     ArrayList<Task> getHistory();
+
+    ArrayList<Task> getPrioritizedTasks();
 }
