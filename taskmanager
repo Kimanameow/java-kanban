@@ -1,3 +1,1 @@
 id,type,name,status,description,duration,startTime,epic
-30,EPIC,Epic1,DONE,Description1,10,14-10-2024 21:27:54
-20,SUBTASK,Name,DONE,Descr,10,14-10-2024 21:27:54,30

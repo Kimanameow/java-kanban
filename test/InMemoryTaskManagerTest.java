@@ -13,8 +13,7 @@ import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
-    TaskManager taskManager;
+class InMemoryTaskManagerTest extends TaskManagerTest<TaskManager> {
 
     @BeforeEach
     public void createManagerForEachTest() {
@@ -23,10 +22,10 @@ class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
 
     @Test
     void taskWithNextIdAndOurId() {
-        Task task1 = new Task("Task1", "Description",10, StatusOfTask.NEW, LocalDateTime.now(), 10);
+        Task task1 = new Task("Task1", "Description", 10, StatusOfTask.NEW, LocalDateTime.now(), 10);
         taskManager.add(task1);
         int id1 = task1.getId();
-        Task task2 = new Task("Task1", "Description",10, StatusOfTask.NEW, LocalDateTime.now().plusDays(10), 10);
+        Task task2 = new Task("Task1", "Description", 10, StatusOfTask.NEW, LocalDateTime.now().plusDays(10), 10);
         taskManager.add(task2);
         assertNotEquals(id1, 258);
         assertTrue(taskManager.allTasks().contains(task1));
@@ -35,8 +34,8 @@ class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
 
     @Test
     void addAndFindTasksPerId() {
-        Task task1 = new Task("Task1", "Description",10, StatusOfTask.NEW, LocalDateTime.now(), 10);
-        Epic epic1 = new Epic("Task1", "Description",100, StatusOfTask.NEW, LocalDateTime.now(),26);
+        Task task1 = new Task("Task1", "Description", 10, StatusOfTask.NEW, LocalDateTime.now(), 10);
+        Epic epic1 = new Epic("Task1", "Description", 100, StatusOfTask.NEW, LocalDateTime.now(), 26);
 
         taskManager.add(task1);
         taskManager.add(epic1);

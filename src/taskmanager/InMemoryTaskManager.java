@@ -18,7 +18,6 @@ public class InMemoryTaskManager implements TaskManager {
     protected HistoryManager historyManager = Managers.getDefaultHistory();
     protected int nextId = 1;
     protected TreeSet<Task> sortedTasks = new TreeSet<>(Comparator.comparing(Task::getStartTime));
-    protected TreeSet<Subtask> sortedSubtasks = new TreeSet<>(Comparator.comparing(Subtask::getStartTime));
 
 
     @Override
@@ -46,7 +45,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void removeEpics() {
         epics.clear();
         subtasks.clear();
-        sortedSubtasks.clear();
+        sortedTasks.clear();
     }
 
     @Override
@@ -56,7 +55,7 @@ public class InMemoryTaskManager implements TaskManager {
             changeStatus(e);
             e.getListOfSubtasks().clear();
         }
-        sortedSubtasks.clear();
+        sortedTasks.clear();
     }
 
 
@@ -116,7 +115,7 @@ public class InMemoryTaskManager implements TaskManager {
             epic1.getListOfSubtasks().add(subtask.getId());
             changeStatus(epic1);
             findTimeFromSubtasks(epics.get(subtask.getIdOfEpic()));
-            sortedSubtasks.add(subtask);
+            sortedTasks.add(subtask);
         } else throw new NotAvailableTimeException("Задача на данное время уже существует");
     }
 
@@ -134,7 +133,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void removeTaskPerId(int id) {
-        sortedTasks.remove(getTaskPerId(id));
+        sortedTasks.remove(tasks.get(id));
         tasks.remove(id);
     }
 
@@ -142,13 +141,14 @@ public class InMemoryTaskManager implements TaskManager {
     public void removeEpicPerId(int id) {
         Epic epic = epics.remove(id);
         if (epic != null) {
+            epic.getListOfSubtasks().forEach(sortedTasks::remove);
             epic.getListOfSubtasks().forEach(subtasks::remove);
         }
     }
 
     @Override
     public void removeSubtaskPerId(int id) {
-        sortedSubtasks.remove(getSubtaskPerId(id));
+        sortedTasks.remove(subtasks.get(id));
         int epicId = subtasks.get(id).getIdOfEpic();
         if (!subtasks.containsKey(id)) {
             return;
@@ -164,7 +164,6 @@ public class InMemoryTaskManager implements TaskManager {
     public void updateTask(int id, Task task) {
         if (tasks.containsKey(id)) {
             sortedTasks.remove(getTaskPerId(id));
-            tasks.remove(id);
             add(task);
         }
     }
