@@ -1,14 +1,12 @@
 package taskmanager;
 
 import history.HistoryManager;
-import tasks.Epic;
-import tasks.StatusOfTask;
-import tasks.Subtask;
-import tasks.Task;
+import tasks.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class InMemoryTaskManager implements TaskManager {
 
@@ -38,14 +36,19 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void removeTasks() {
         tasks.clear();
-        sortedTasks.clear();
+        sortedTasks = sortedTasks.stream()
+                .filter(task -> task.getType().equals(TypeOfTask.SUBTASK))
+                .collect(Collectors.toCollection(TreeSet::new));
     }
 
     @Override
     public void removeEpics() {
         epics.clear();
         subtasks.clear();
-        sortedTasks.clear();
+        sortedTasks = sortedTasks.stream()
+                .filter(task -> task.getType().equals(TypeOfTask.TASK))
+                .collect(Collectors.toCollection(TreeSet::new));
+
     }
 
     @Override
@@ -55,7 +58,10 @@ public class InMemoryTaskManager implements TaskManager {
             changeStatus(e);
             e.getListOfSubtasks().clear();
         }
-        sortedTasks.clear();
+        TreeSet<Task> onlyTasks = sortedTasks.stream()
+                .filter(task -> task.getType().equals(TypeOfTask.TASK))
+                .collect(Collectors.toCollection(TreeSet::new));
+        sortedTasks = onlyTasks;
     }
 
 
