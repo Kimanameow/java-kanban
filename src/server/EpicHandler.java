@@ -3,15 +3,11 @@ package server;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import taskmanager.EpicNotFoundException;
-import taskmanager.TaskManager;
+import tasks.Epic;
 
 import java.io.IOException;
 
 class EpicHandler extends TaskHandler implements HttpHandler {
-
-    public EpicHandler(TaskManager manager) {
-        super(manager);
-    }
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
@@ -22,12 +18,24 @@ class EpicHandler extends TaskHandler implements HttpHandler {
                 case "GET":
                     sendResponse(200, httpExchange, convertJson(manager.allEpics()));
                     break;
+                case "POST":
+                    Epic epic = postRequestFromUser(httpExchange);
+                    if (epic == null) {
+                        throw new CantAddTaskException("Can't add this epic");
+                    } else {
+                        if (epic.getId() == 0) {
+                            manager.add(epic);
+                        } else {
+                            manager.updateTask(epic.getId(), epic);
+                        }
+                        sendResponse(201, httpExchange, "Successful");
+                    }
                 case "DELETE":
                     manager.removeEpics();
                     sendResponse(201, httpExchange, "Successful");
                     break;
                 default:
-                    throw new RequestMethodException("Request method not found");
+                    sendResponse(405, httpExchange, "Method not allowed");
             }
 
 
@@ -50,7 +58,7 @@ class EpicHandler extends TaskHandler implements HttpHandler {
                         sendResponse(201, httpExchange, "Successful");
                         break;
                     default:
-                        throw new RequestMethodException("Request method not found");
+                        sendResponse(405, httpExchange, "Method not allowed");
                 }
             }
         }

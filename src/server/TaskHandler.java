@@ -1,9 +1,7 @@
 package server;
 
-import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import taskmanager.TaskManager;
 import tasks.Task;
 
 import java.io.BufferedReader;
@@ -12,12 +10,6 @@ import java.io.InputStreamReader;
 import java.util.stream.Collectors;
 
 class TaskHandler extends BaseHttpHandler implements HttpHandler {
-    protected final TaskManager manager;
-    Gson gson = new Gson();
-
-    public TaskHandler(TaskManager manager) {
-        this.manager = manager;
-    }
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
@@ -29,17 +21,16 @@ class TaskHandler extends BaseHttpHandler implements HttpHandler {
                         Task t = manager.getTaskPerId(id);
                         if (t != null) {
                             sendResponse(200, httpExchange, convertJson(t));
-                            break;
                         } else {
                             sendResponse(404, httpExchange, "Not found");
-                            break;
                         }
+                        break;
                     case "DELETE":
                         manager.removeTaskPerId(id);
                         sendResponse(200, httpExchange, "Successful!");
                         break;
                     default:
-                        throw new RequestMethodException("Request method not found");
+                        sendResponse(405, httpExchange, "Method not allowed");
                 }
             }
         } catch (NumberFormatException e) {
@@ -56,18 +47,18 @@ class TaskHandler extends BaseHttpHandler implements HttpHandler {
                 break;
             case "POST":
                 Task task = postRequestFromUser(httpExchange);
-                try {
+                if (task == null) {
+                    throw new CantAddTaskException("Can't add this task");
+                } else {
                     if (task.getId() == 0) {
                         manager.add(task);
                     } else {
                         manager.updateTask(task.getId(), task);
                     }
                     sendResponse(201, httpExchange, "Successful");
-                } catch (NullPointerException n) {
-                    sendResponse(404, httpExchange, "Can't resolve task");
                 }
             default:
-                throw new RequestMethodException("Request method not found");
+                sendResponse(405, httpExchange, "Method not allowed");
         }
     }
 
@@ -80,12 +71,10 @@ class TaskHandler extends BaseHttpHandler implements HttpHandler {
 
     public int getIdFromPath(HttpExchange httpExchange) {
         String[] path = httpExchange.getRequestURI().getPath().split("/");
-        try {
-            int id = Integer.parseInt(path[2]);
-            return id;
-        } catch (NullPointerException n) {
+        String id = path[2];
+        if (id == null) {
             return 0;
-        }
+        } else return Integer.parseInt(id);
     }
 
     public <T extends Task> T postRequestFromUser(HttpExchange h) throws IOException {
@@ -94,8 +83,6 @@ class TaskHandler extends BaseHttpHandler implements HttpHandler {
             requestBody = br.lines().collect(Collectors.joining(System.lineSeparator()));
             T task = gson.fromJson(requestBody, (Class<T>) Task.class);
             return task;
-        } catch (NullPointerException e) {
-            return null;
         }
     }
 }
