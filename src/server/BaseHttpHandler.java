@@ -5,7 +5,7 @@ import com.sun.net.httpserver.HttpExchange;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-public class BaseHttpHandler implements HttpHandler{
+public class BaseHttpHandler implements HttpHandler {
     protected void sendResponse(int responseCode, HttpExchange exchange, String arguments) throws IOException {
         byte[] text = arguments.getBytes(StandardCharsets.UTF_8);
         exchange.getResponseHeaders().set("Content-type", "application/json;charset=utf-8");
