@@ -15,50 +15,46 @@ class TaskHandler extends BaseHttpHandler implements HttpHandler {
     public void handle(HttpExchange httpExchange) throws IOException {
         int id = getIdFromPath(httpExchange);
         try {
-            if (id != 0) {
-                switch (httpExchange.getRequestMethod()) {
-                    case "GET":
+            switch (httpExchange.getRequestMethod()) {
+                case "GET":
+                    if (id != 0) {
                         Task t = manager.getTaskPerId(id);
                         if (t != null) {
                             sendResponse(200, httpExchange, convertJson(t));
                         } else {
                             sendResponse(404, httpExchange, "Not found");
                         }
-                        break;
-                    case "DELETE":
+                    } else {
+                        sendResponse(200, httpExchange, convertJson(manager.allTasks()));
+                    }
+                    break;
+                case "DELETE":
+                    if (id != 0) {
                         manager.removeTaskPerId(id);
                         sendResponse(200, httpExchange, "Successful!");
-                        break;
-                    default:
-                        sendResponse(405, httpExchange, "Method not allowed");
-                }
+                    } else {
+                        manager.removeTasks();
+                        sendResponse(201, httpExchange, "All tasks removed");
+                    }
+                    break;
+                case "POST":
+                    Task task = postRequestFromUser(httpExchange);
+                    if (task == null) {
+                        sendResponse(400, httpExchange, "Can't add this task");
+                    } else {
+                        if (task.getId() == 0) {
+                            manager.add(task);
+                        } else {
+                            manager.updateTask(task.getId(), task);
+                        }
+                        sendResponse(201, httpExchange, "Successful");
+                    }
+                    break;
+                default:
+                    sendResponse(405, httpExchange, "Method not allowed");
             }
         } catch (NumberFormatException e) {
             sendResponse(404, httpExchange, "Invalid number format");
-        }
-        switch (httpExchange.getRequestMethod()) {
-            case "GET":
-                manager.allTasks();
-                sendResponse(200, httpExchange, convertJson(manager.allTasks()));
-                break;
-            case "DELETE":
-                manager.removeTasks();
-                sendResponse(201, httpExchange, "Successful");
-                break;
-            case "POST":
-                Task task = postRequestFromUser(httpExchange);
-                if (task == null) {
-                    throw new CantAddTaskException("Can't add this task");
-                } else {
-                    if (task.getId() == 0) {
-                        manager.add(task);
-                    } else {
-                        manager.updateTask(task.getId(), task);
-                    }
-                    sendResponse(201, httpExchange, "Successful");
-                }
-            default:
-                sendResponse(405, httpExchange, "Method not allowed");
         }
     }
 
@@ -71,18 +67,24 @@ class TaskHandler extends BaseHttpHandler implements HttpHandler {
 
     public int getIdFromPath(HttpExchange httpExchange) {
         String[] path = httpExchange.getRequestURI().getPath().split("/");
-        String id = path[2];
-        if (id == null) {
+        try {
+            if (path.length > 2) {
+                return Integer.parseInt(path[2]);
+            }
+        } catch (NumberFormatException e) {
             return 0;
-        } else return Integer.parseInt(id);
+        }
+        return 0;
     }
 
-    public <T extends Task> T postRequestFromUser(HttpExchange h) throws IOException {
+    public <T extends Task> T postRequestFromUser(HttpExchange h) {
         String requestBody;
+
         try (BufferedReader br = new BufferedReader(new InputStreamReader(h.getRequestBody()))) {
             requestBody = br.lines().collect(Collectors.joining(System.lineSeparator()));
-            T task = gson.fromJson(requestBody, (Class<T>) Task.class);
-            return task;
+            return gson.fromJson(requestBody, (Class<T>) Task.class);
+        } catch (IOException e) {
+            return null;
         }
     }
 }

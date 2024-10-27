@@ -16,6 +16,7 @@ class SubtaskHandler extends TaskHandler implements HttpHandler {
             switch (request) {
                 case "GET":
                     sendResponse(200, httpExchange, convertJson(manager.allSubtasks()));
+                    break;
                 case "POST":
                     Subtask subtask = postRequestFromUser(httpExchange);
                     if (subtask == null) {
@@ -27,20 +28,24 @@ class SubtaskHandler extends TaskHandler implements HttpHandler {
                             manager.updateSubtask(subtask.getId(), subtask);
                         }
                         sendResponse(201, httpExchange, "Successful");
+                        break;
                     }
                 default:
                     sendResponse(405, httpExchange, "Method not allowed");
+                    break;
             }
         } else {
             switch (request) {
                 case "GET":
                     sendResponse(200, httpExchange, convertJson(manager.getSubtaskPerId(id)));
+                    break;
                 case "DELETE":
                     manager.removeSubtaskPerId(id);
                     sendResponse(201, httpExchange, "Deleted");
                     break;
                 default:
                     sendResponse(405, httpExchange, "Method not allowed");
+                    break;
             }
 
         }

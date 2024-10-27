@@ -21,7 +21,8 @@ class EpicHandler extends TaskHandler implements HttpHandler {
                 case "POST":
                     Epic epic = postRequestFromUser(httpExchange);
                     if (epic == null) {
-                        throw new CantAddTaskException("Can't add this epic");
+                        sendResponse(405, httpExchange, "Can't read epic");
+                        break;
                     } else {
                         if (epic.getId() == 0) {
                             manager.add(epic);
@@ -29,6 +30,7 @@ class EpicHandler extends TaskHandler implements HttpHandler {
                             manager.updateTask(epic.getId(), epic);
                         }
                         sendResponse(201, httpExchange, "Successful");
+                        break;
                     }
                 case "DELETE":
                     manager.removeEpics();
@@ -36,6 +38,7 @@ class EpicHandler extends TaskHandler implements HttpHandler {
                     break;
                 default:
                     sendResponse(405, httpExchange, "Method not allowed");
+                    break;
             }
 
 
@@ -43,9 +46,9 @@ class EpicHandler extends TaskHandler implements HttpHandler {
             String[] path = httpExchange.getRequestURI().getPath().split("/");
             if (path.length > 3) {
                 try {
-                    if (method.equals("GET")) {
+                    if (method.equals("GET") || path[3].equals("subtasks")) {
                         sendResponse(200, httpExchange, convertJson(manager.subtasksForEpic(id)));
-                    } else throw new IndexOutOfBoundsException("Request method not found");
+                    } else sendResponse(405, httpExchange, "Method not allowed");
                 } catch (EpicNotFoundException e) {
                     sendResponse(404, httpExchange, "Epic not found!");
                 }
@@ -59,6 +62,7 @@ class EpicHandler extends TaskHandler implements HttpHandler {
                         break;
                     default:
                         sendResponse(405, httpExchange, "Method not allowed");
+                        break;
                 }
             }
         }
