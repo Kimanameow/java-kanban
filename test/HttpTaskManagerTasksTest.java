@@ -177,26 +177,6 @@ public class HttpTaskManagerTasksTest {
     }
 
     @Test
-    public void testDeleteSubtaskById() throws Exception {
-        Epic epic1 = new Epic("Name", "descr", 10, StatusOfTask.NEW, LocalDateTime.now(), 10);
-        manager.add(epic1);
-        Subtask stask = new Subtask("Name", "descr", 100, StatusOfTask.NEW, epic1.getId(), 10, LocalDateTime.now());
-        manager.add(stask);
-
-        HttpClient client = HttpClient.newHttpClient();
-        URI url = URI.create("http://localhost:8080/subtask/100");
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(url)
-                .DELETE()
-                .build();
-
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-        assertEquals(200, response.statusCode());
-    }
-
-
-    @Test
     public void testGetSubtasksForEpic() throws IOException, InterruptedException {
         Epic epic1 = new Epic("Name", "descr", 10, StatusOfTask.NEW, LocalDateTime.now(), 10);
         manager.add(epic1);
@@ -229,6 +209,25 @@ public class HttpTaskManagerTasksTest {
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         assertEquals(201, response.statusCode());
         assertEquals("Successful", response.body());
+    }
+
+    @Test
+    public void testDeleteSubtaskById() throws Exception {
+        Epic epic1 = new Epic("Name", "descr", 10, StatusOfTask.NEW, LocalDateTime.now(), 10);
+        manager.add(epic1);
+        Subtask stask = new Subtask("Name", "descr", 100, StatusOfTask.NEW, epic1.getId(), 10, LocalDateTime.now());
+        manager.add(stask);
+
+        HttpClient client = HttpClient.newHttpClient();
+        URI url = URI.create("http://localhost:8080/subtask/100");
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(url)
+                .DELETE()
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        assertEquals(200, response.statusCode());
     }
 
     @Test
