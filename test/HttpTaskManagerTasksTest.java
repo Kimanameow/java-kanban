@@ -259,9 +259,8 @@ public class HttpTaskManagerTasksTest {
         assertEquals(200, response.statusCode());
         assertNotNull(response.body());
     }
-}
 
-   /* @Test
+    @Test
     public void testAddEpic() throws IOException, InterruptedException {
         Epic epic = new Epic("Name", "descr", 10, StatusOfTask.NEW, LocalDateTime.now(), 10);
 
@@ -280,4 +279,4 @@ public class HttpTaskManagerTasksTest {
         assertEquals(201, response.statusCode());
         assertEquals("Successful", response.body());
     }
-}*/
+}

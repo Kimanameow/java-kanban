@@ -89,8 +89,13 @@ class TaskHandler extends BaseHttpHandler implements HttpHandler {
 
         try (BufferedReader br = new BufferedReader(new InputStreamReader(h.getRequestBody()))) {
             requestBody = br.lines().collect(Collectors.joining(System.lineSeparator()));
-            return gson.fromJson(requestBody, (Class<T>) Task.class);
+            if (requestBody != null && !requestBody.isEmpty()) {
+                return gson.fromJson(requestBody, (Class<T>) Task.class);
+            } else {
+                return null;
+            }
         } catch (IOException e) {
+            e.printStackTrace();
             return null;
         }
     }

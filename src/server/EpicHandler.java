@@ -7,7 +7,10 @@ import taskmanager.EpicNotFoundException;
 import taskmanager.TaskManager;
 import tasks.Epic;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.stream.Collectors;
 
 class EpicHandler extends TaskHandler implements HttpHandler {
 
@@ -17,26 +20,33 @@ class EpicHandler extends TaskHandler implements HttpHandler {
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
-        String method = httpExchange.getRequestMethod();
         int id = getIdFromPath(httpExchange);
         if (id == 0) {
-            switch (method) {
+            switch (httpExchange.getRequestMethod()) {
                 case "GET":
                     sendResponse(200, httpExchange, convertJson(manager.allEpics()));
                     break;
                 case "POST":
-                    Epic epic = postRequestFromUser(httpExchange);
-                    if (epic == null) {
-                        sendResponse(405, httpExchange, "Can't read epic");
-                        break;
-                    } else {
-                        if (epic.getId() == 0) {
-                            manager.add(epic);
-                        } else {
-                            manager.updateEpic(epic.getId(), epic);
+                    String requestBody;
+                    try (BufferedReader br = new BufferedReader(new InputStreamReader(httpExchange.getRequestBody()))) {
+                        requestBody = br.lines().collect(Collectors.joining(System.lineSeparator()));
+                        if (requestBody == null || requestBody.isEmpty()) {
+                            sendResponse(400, httpExchange, "Request body is empty");
+                            break;
                         }
-                        sendResponse(201, httpExchange, "Successful");
-                        break;
+                        Epic epic = gson.fromJson(requestBody, Epic.class);
+                        if (epic == null) {
+                            sendResponse(405, httpExchange, "Can't read epic");
+                            break;
+                        } else {
+                            if (epic.getId() == 0) {
+                                manager.add(epic);
+                            } else {
+                                manager.updateEpic(epic.getId(), epic);
+                            }
+                            sendResponse(201, httpExchange, "Successful");
+                            break;
+                        }
                     }
                 case "DELETE":
                     manager.removeEpics();
@@ -52,14 +62,14 @@ class EpicHandler extends TaskHandler implements HttpHandler {
             String[] path = httpExchange.getRequestURI().getPath().split("/");
             if (path.length > 4) {
                 try {
-                    if (method.equals("GET") || path[3].equals("subtasks")) {
+                    if (httpExchange.getRequestMethod().equals("GET") || path[3].equals("subtasks")) {
                         sendResponse(200, httpExchange, convertJson(manager.subtasksForEpic(id)));
                     } else sendResponse(405, httpExchange, "Method not allowed");
                 } catch (EpicNotFoundException e) {
                     sendResponse(404, httpExchange, "Epic not found!");
                 }
             } else {
-                switch (method) {
+                switch (httpExchange.getRequestMethod()) {
                     case "GET":
                         sendResponse(200, httpExchange, convertJson(manager.getEpicPerId(id)));
                         break;
