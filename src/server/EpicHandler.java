@@ -2,12 +2,18 @@ package server;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import history.HistoryManager;
 import taskmanager.EpicNotFoundException;
+import taskmanager.TaskManager;
 import tasks.Epic;
 
 import java.io.IOException;
 
 class EpicHandler extends TaskHandler implements HttpHandler {
+
+    public EpicHandler(TaskManager manager, HistoryManager historyManager) {
+        super(manager);
+    }
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
@@ -27,7 +33,7 @@ class EpicHandler extends TaskHandler implements HttpHandler {
                         if (epic.getId() == 0) {
                             manager.add(epic);
                         } else {
-                            manager.updateTask(epic.getId(), epic);
+                            manager.updateEpic(epic.getId(), epic);
                         }
                         sendResponse(201, httpExchange, "Successful");
                         break;
@@ -44,7 +50,7 @@ class EpicHandler extends TaskHandler implements HttpHandler {
 
         } else {
             String[] path = httpExchange.getRequestURI().getPath().split("/");
-            if (path.length > 3) {
+            if (path.length > 4) {
                 try {
                     if (method.equals("GET") || path[3].equals("subtasks")) {
                         sendResponse(200, httpExchange, convertJson(manager.subtasksForEpic(id)));

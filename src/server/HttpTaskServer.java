@@ -1,6 +1,7 @@
 package server;
 
 import com.sun.net.httpserver.HttpServer;
+import history.HistoryManager;
 import taskmanager.Managers;
 import taskmanager.TaskManager;
 
@@ -9,20 +10,8 @@ import java.net.InetSocketAddress;
 
 public class HttpTaskServer {
     private final HttpServer httpServer;
-    private static TaskManager manager;
+    private final TaskManager manager;
     static final int port = 8080;
-
-
-    public static void main(String[] args) {
-        try {
-            manager = Managers.getDefault();
-            HttpTaskServer server = new HttpTaskServer(manager);
-            server.startServer();
-        } catch (IOException e) {
-            System.err.println("Ошибка при запуске сервера: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
 
     public HttpTaskServer(TaskManager manager) throws IOException {
         this.httpServer = HttpServer.create(new InetSocketAddress(port), 0);
@@ -31,12 +20,13 @@ public class HttpTaskServer {
     }
 
     private void createContexts() {
-
-        httpServer.createContext("/task", new TaskHandler());
-        httpServer.createContext("/subtask", new SubtaskHandler());
-        httpServer.createContext("/epic", new EpicHandler());
-        httpServer.createContext("/history", new HistoryHandler());
-        httpServer.createContext("/prioritized", new PrioritizedHandler());
+        // Получите экземпляр historyManager
+        HistoryManager historyManager = Managers.getDefaultHistory();
+        httpServer.createContext("/task", new TaskHandler(manager));
+        httpServer.createContext("/subtask", new SubtaskHandler(manager, historyManager));
+        httpServer.createContext("/epic", new EpicHandler(manager, historyManager));
+        httpServer.createContext("/history", new HistoryHandler(manager, historyManager));
+        httpServer.createContext("/prioritized", new PrioritizedHandler(manager));
     }
 
     public void startServer() {

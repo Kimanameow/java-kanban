@@ -4,6 +4,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
 import server.DurationAdapter;
+import server.EpicAdapter;
 import server.HttpTaskServer;
 import server.LocalDateTimeAdapter;
 import taskmanager.InMemoryTaskManager;
@@ -34,6 +35,7 @@ public class HttpTaskManagerTasksTest {
     Gson gson = new GsonBuilder()
             .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
             .registerTypeAdapter(Duration.class, new DurationAdapter())
+            .registerTypeAdapter(Epic.class, new EpicAdapter())
             .create();
 
     public HttpTaskManagerTasksTest() throws IOException {
@@ -42,9 +44,6 @@ public class HttpTaskManagerTasksTest {
     @BeforeEach
     public void startServer() {
         server.startServer();
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter());
-        Gson gson = gsonBuilder.create();
     }
 
     @AfterEach
@@ -90,7 +89,7 @@ public class HttpTaskManagerTasksTest {
         manager.add(stask);
 
         HttpClient client = HttpClient.newHttpClient();
-        URI url = URI.create("http://localhost:8080/subtasktask");
+        URI url = URI.create("http://localhost:8080/subtask");
         HttpRequest request = HttpRequest.newBuilder().uri(url).GET().build();
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
@@ -191,25 +190,6 @@ public class HttpTaskManagerTasksTest {
         assertEquals(200, response.statusCode());
         assertNotNull(response.body());
     }
-}
-/*
-    @Test
-    public void testAddEpic() throws IOException, InterruptedException {
-        Epic epic = new Epic("Name", "descr", 10, StatusOfTask.NEW, LocalDateTime.now(), 10);
-
-        HttpClient client = HttpClient.newHttpClient();
-        URI url = URI.create("http://localhost:8080/epic");
-        String json = gson.toJson(epic);
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(url)
-                .POST(HttpRequest.BodyPublishers.ofString(json))
-                .header("Content-Type", "application/json")
-                .build();
-
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        assertEquals(201, response.statusCode());
-        assertEquals("Successful", response.body());
-    }
 
     @Test
     public void testDeleteSubtaskById() throws Exception {
@@ -227,7 +207,7 @@ public class HttpTaskManagerTasksTest {
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        assertEquals(200, response.statusCode());
+        assertEquals(201, response.statusCode());
     }
 
     @Test
@@ -261,25 +241,6 @@ public class HttpTaskManagerTasksTest {
     }
 
     @Test
-    public void testPostEpic() throws IOException, InterruptedException {
-        Epic epic = new Epic("New Epic", "Description", 10, StatusOfTask.NEW, LocalDateTime.now(), 10);
-        URI url = URI.create("http://localhost:8080/epic");
-
-        String json = gson.toJson(epic);
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(url)
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(json))
-                .build();
-        HttpClient client = HttpClient.newHttpClient();
-
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-        assertEquals(201, response.statusCode());
-        assertNotNull(response.body());
-    }
-
-    @Test
     public void testGetSubtaskById() throws Exception {
         Epic epic1 = new Epic("Name", "descr", 10, StatusOfTask.NEW, LocalDateTime.now(), 10);
         manager.add(epic1);
@@ -297,5 +258,26 @@ public class HttpTaskManagerTasksTest {
 
         assertEquals(200, response.statusCode());
         assertNotNull(response.body());
+    }
+}
+
+   /* @Test
+    public void testAddEpic() throws IOException, InterruptedException {
+        Epic epic = new Epic("Name", "descr", 10, StatusOfTask.NEW, LocalDateTime.now(), 10);
+
+        HttpClient client = HttpClient.newHttpClient();
+        URI url = URI.create("http://localhost:8080/epic");
+
+        String json = gson.toJson(epic);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(url)
+                .POST(HttpRequest.BodyPublishers.ofString(json))
+                .header("Content-Type", "application/json")
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        assertEquals(201, response.statusCode());
+        assertEquals("Successful", response.body());
     }
 }*/

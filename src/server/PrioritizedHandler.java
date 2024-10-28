@@ -2,10 +2,15 @@ package server;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import taskmanager.TaskManager;
 
 import java.io.IOException;
 
 class PrioritizedHandler extends TaskHandler implements HttpHandler {
+
+    public PrioritizedHandler(TaskManager manager) {
+        super(manager);
+    }
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {

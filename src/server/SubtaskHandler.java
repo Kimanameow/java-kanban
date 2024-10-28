@@ -2,11 +2,17 @@ package server;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import history.HistoryManager;
+import taskmanager.TaskManager;
 import tasks.Subtask;
 
 import java.io.IOException;
 
 class SubtaskHandler extends TaskHandler implements HttpHandler {
+
+    public SubtaskHandler(TaskManager manager, HistoryManager historyManager) {
+        super(manager);
+    }
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
@@ -20,7 +26,7 @@ class SubtaskHandler extends TaskHandler implements HttpHandler {
                 case "POST":
                     Subtask subtask = postRequestFromUser(httpExchange);
                     if (subtask == null) {
-                        throw new CantAddTaskException("Can't add Subtask");
+                        sendResponse(400, httpExchange, "Can't add");
                     } else {
                         if (subtask.getId() == 0) {
                             manager.add(subtask);

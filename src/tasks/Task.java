@@ -117,4 +117,11 @@ public class Task {
     public LocalDateTime getEndTime() {
         return startTime.plusMinutes(duration.toMinutes());
     }
+
+    public void setDescription(String description) {
+    }
+
+    public Object getDuration() {
+        return duration;
+    }
 }

@@ -2,6 +2,8 @@ package server;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import taskmanager.Managers;
+import taskmanager.TaskManager;
 import tasks.Task;
 
 import java.io.BufferedReader;
@@ -10,6 +12,11 @@ import java.io.InputStreamReader;
 import java.util.stream.Collectors;
 
 class TaskHandler extends BaseHttpHandler implements HttpHandler {
+
+
+    public TaskHandler(TaskManager manager) {
+        super(manager, Managers.getDefaultHistory());
+    }
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
