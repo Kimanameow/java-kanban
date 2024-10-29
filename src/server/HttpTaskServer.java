@@ -1,8 +1,6 @@
 package server;
 
 import com.sun.net.httpserver.HttpServer;
-import history.HistoryManager;
-import taskmanager.Managers;
 import taskmanager.TaskManager;
 
 import java.io.IOException;
@@ -20,12 +18,10 @@ public class HttpTaskServer {
     }
 
     private void createContexts() {
-        // Получите экземпляр historyManager
-        HistoryManager historyManager = Managers.getDefaultHistory();
         httpServer.createContext("/task", new TaskHandler(manager));
-        httpServer.createContext("/subtask", new SubtaskHandler(manager, historyManager));
-        httpServer.createContext("/epic", new EpicHandler(manager, historyManager));
-        httpServer.createContext("/history", new HistoryHandler(manager, historyManager));
+        httpServer.createContext("/subtask", new SubtaskHandler(manager));
+        httpServer.createContext("/epic", new EpicHandler(manager));
+        httpServer.createContext("/history", new HistoryHandler(manager));
         httpServer.createContext("/prioritized", new PrioritizedHandler(manager));
     }
 

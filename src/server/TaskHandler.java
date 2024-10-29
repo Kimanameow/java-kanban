@@ -15,7 +15,7 @@ class TaskHandler extends BaseHttpHandler implements HttpHandler {
 
 
     public TaskHandler(TaskManager manager) {
-        super(manager, Managers.getDefaultHistory());
+        super(manager);
     }
 
     @Override

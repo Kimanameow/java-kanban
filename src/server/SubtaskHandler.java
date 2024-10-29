@@ -2,7 +2,6 @@ package server;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import history.HistoryManager;
 import taskmanager.TaskManager;
 import tasks.Subtask;
 
@@ -10,7 +9,7 @@ import java.io.IOException;
 
 class SubtaskHandler extends TaskHandler implements HttpHandler {
 
-    public SubtaskHandler(TaskManager manager, HistoryManager historyManager) {
+    public SubtaskHandler(TaskManager manager) {
         super(manager);
     }
 

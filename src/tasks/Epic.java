@@ -7,7 +7,7 @@ import java.util.ArrayList;
 public class Epic extends Task {
 
     private ArrayList<Integer> listOfSubtasks = new ArrayList<>();
-    private static final TypeOfTask type = TypeOfTask.EPIC;
+    private static final TypeOfTask TYPE = TypeOfTask.EPIC;
     private LocalDateTime endTime;
 
 

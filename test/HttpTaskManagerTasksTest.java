@@ -4,7 +4,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
 import server.DurationAdapter;
-import server.EpicAdapter;
 import server.HttpTaskServer;
 import server.LocalDateTimeAdapter;
 import taskmanager.InMemoryTaskManager;
@@ -35,7 +34,6 @@ public class HttpTaskManagerTasksTest {
     Gson gson = new GsonBuilder()
             .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
             .registerTypeAdapter(Duration.class, new DurationAdapter())
-            .registerTypeAdapter(Epic.class, new EpicAdapter())
             .create();
 
     public HttpTaskManagerTasksTest() throws IOException {
@@ -44,6 +42,9 @@ public class HttpTaskManagerTasksTest {
     @BeforeEach
     public void startServer() {
         server.startServer();
+        manager.removeEpics();
+        manager.removeSubtasks();
+        manager.removeTasks();
     }
 
     @AfterEach
@@ -138,7 +139,9 @@ public class HttpTaskManagerTasksTest {
     @Test
     public void testSortedMap() throws IOException, InterruptedException {
         Task task = new Task("Name", "descr", 10, StatusOfTask.NEW, LocalDateTime.now(), 10);
+        Task task1 = new Task("Name", "descr", 20, StatusOfTask.NEW, LocalDateTime.now().plusDays(2), 10);
         manager.add(task);
+        manager.add(task1);
 
         HttpClient client = HttpClient.newHttpClient();
         URI url = URI.create("http://localhost:8080/prioritized");
@@ -195,7 +198,7 @@ public class HttpTaskManagerTasksTest {
     public void testDeleteSubtaskById() throws Exception {
         Epic epic1 = new Epic("Name", "descr", 10, StatusOfTask.NEW, LocalDateTime.now(), 10);
         manager.add(epic1);
-        Subtask stask = new Subtask("Name", "descr", 100, StatusOfTask.NEW, epic1.getId(), 10, LocalDateTime.now());
+        Subtask stask = new Subtask("Name", "descr", 100, StatusOfTask.NEW, epic1.getId(), 10, LocalDateTime.now().plusDays(2));
         manager.add(stask);
 
         HttpClient client = HttpClient.newHttpClient();

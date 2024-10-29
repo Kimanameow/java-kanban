@@ -3,6 +3,7 @@ package server;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
 import history.HistoryManager;
 import taskmanager.TaskManager;
 import tasks.Epic;
@@ -12,18 +13,15 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
-public class BaseHttpHandler {
+public abstract class BaseHttpHandler implements HttpHandler {
     protected final TaskManager manager;
     protected final Gson gson;
-    protected final HistoryManager historyManager;
 
-    public BaseHttpHandler(TaskManager manager, HistoryManager historyManager) {
+    public BaseHttpHandler(TaskManager manager) {
         this.manager = manager;
-        this.historyManager = historyManager;
         this.gson = new GsonBuilder()
                 .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
                 .registerTypeAdapter(Duration.class, new DurationAdapter())
-                .registerTypeAdapter(Epic.class, new EpicAdapter())
                 .create();
     }
 

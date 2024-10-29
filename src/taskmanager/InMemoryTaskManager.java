@@ -35,33 +35,36 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void removeTasks() {
-        tasks.clear();
-        sortedTasks = sortedTasks.stream()
-                .filter(task -> task.getType().equals(TypeOfTask.SUBTASK))
-                .collect(Collectors.toCollection(TreeSet::new));
+        if (!tasks.isEmpty()) {
+            tasks.clear();
+            sortedTasks = sortedTasks.stream()
+                    .filter(task -> task.getType().equals(TypeOfTask.SUBTASK))
+                    .collect(Collectors.toCollection(TreeSet::new));
+        }
     }
 
     @Override
     public void removeEpics() {
-        epics.clear();
-        subtasks.clear();
-        sortedTasks = sortedTasks.stream()
-                .filter(task -> task.getType().equals(TypeOfTask.TASK))
-                .collect(Collectors.toCollection(TreeSet::new));
+        if (!epics.isEmpty()) {
+            epics.clear();
+            subtasks.clear();
+        }
 
     }
 
     @Override
     public void removeSubtasks() {
-        subtasks.clear();
-        for (Epic e : epics.values()) {
-            changeStatus(e);
-            e.getListOfSubtasks().clear();
+        if (!subtasks.isEmpty()) {
+            subtasks.clear();
+            for (Epic e : epics.values()) {
+                changeStatus(e);
+                e.getListOfSubtasks().clear();
+            }
+            TreeSet<Task> onlyTasks = sortedTasks.stream()
+                    .filter(task -> task.getType().equals(TypeOfTask.TASK))
+                    .collect(Collectors.toCollection(TreeSet::new));
+            sortedTasks = onlyTasks;
         }
-        TreeSet<Task> onlyTasks = sortedTasks.stream()
-                .filter(task -> task.getType().equals(TypeOfTask.TASK))
-                .collect(Collectors.toCollection(TreeSet::new));
-        sortedTasks = onlyTasks;
     }
 
 
@@ -86,9 +89,11 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void add(Task task) {
         if (!findTaskWithTheSameTime(task, allTasks())) {
-            task.setId(nextId);
-            tasks.put(nextId, task);
-            nextId++;
+            if (task.getId() == 0) {
+                task.setId(nextId);
+                nextId++;
+            }
+            tasks.put(task.getId(), task);
             sortedTasks.add(task);
         } else throw new NotAvailableTimeException("Задача на данное время уже существует");
     }

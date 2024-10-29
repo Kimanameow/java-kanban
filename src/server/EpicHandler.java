@@ -2,7 +2,6 @@ package server;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import history.HistoryManager;
 import taskmanager.EpicNotFoundException;
 import taskmanager.TaskManager;
 import tasks.Epic;
@@ -14,7 +13,7 @@ import java.util.stream.Collectors;
 
 class EpicHandler extends TaskHandler implements HttpHandler {
 
-    public EpicHandler(TaskManager manager, HistoryManager historyManager) {
+    public EpicHandler(TaskManager manager) {
         super(manager);
     }
 

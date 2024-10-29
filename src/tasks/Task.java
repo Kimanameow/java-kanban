@@ -13,6 +13,7 @@ public class Task {
     private StatusOfTask status = StatusOfTask.NEW;
     private LocalDateTime startTime;
     private Duration duration;
+    private static final TypeOfTask TYPE = TypeOfTask.TASK;
 
     public Task(String name, String description, int id, StatusOfTask status, LocalDateTime startTime, int minutesOfDuration) {
         this.name = name;
@@ -119,9 +120,10 @@ public class Task {
     }
 
     public void setDescription(String description) {
+        this.description = description;
     }
 
-    public Object getDuration() {
+    public Duration getDuration() {
         return duration;
     }
 }
