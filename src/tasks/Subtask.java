@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 public class Subtask extends Task {
     private int idOfEpic;
+    private static final TypeOfTask TYPE = TypeOfTask.SUBTASK;
 
     public Subtask(String name, int id, StatusOfTask status, int idOfEpic) {
         super(name, id, status);
